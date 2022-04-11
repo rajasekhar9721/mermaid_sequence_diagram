@@ -1,0 +1,37 @@
+<html>
+    <body>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+        <script>
+            mermaid.initialize({ startOnLoad: true });
+        </script>
+        <div class="mermaid">
+            sequenceDiagram
+			participant I as InteractionProcessor
+			participant S as Src_Scrapper
+			participant R as Reftable
+			I->>I: Compute cross product of BankerId and EmailId for the respective meeting
+			I->>+S:Fetch Contact Id for each computed cross product Id's
+			S-->>-I: Return Contact Id's
+			Note left of S: For duplicate contact Id's return first created contact Id
+			I->>+S: Ingest BankerId and EmailId for not found combination
+			S->>S: Autocreate ContactId and Commit the ingestion transaction
+			S-->>-I: Return newly created Contact Id
+			I->>I: Save the returned contactIds in the set datastructure
+			Note left of S: Say above returned contact Id's as input set
+			I->>+R: Fetch contact Id's for the respective meeting using meeting ID
+			R-->>-I: Return Contact Id's
+			Note left of R: Say above returned contact Id's as Reference set
+			I->>I: Save the returned contactIds in the set datastructure
+			I->>I: Compute Ingestion set for reference table
+			Note left of I: Ingestion set = Input set - Reference set
+			I->>+R: Ingest contact Id's from ingestion set for respective meeting
+			R-->>-I: Return successfull transaction message
+			I->>I: Compute Deletion set for reference table
+			Note left of I: Deletion set = Reference set - Input set
+			I->>+R: Update isdelete flag as True for each contact Id from deletion set for respective meeting
+			R-->>-I: Return successfull transaction message
+        </div>
+
+        
+    </body>
+</html>
